@@ -6,7 +6,7 @@ float GyroX, GyroY, GyroZ;
 float accAngleX, accAngleY, gyroAngleX, gyroAngleY, gyroAngleZ;
 float roll, pitch, yaw;
 float AccErrorX, AccErrorY, GyroErrorX, GyroErrorY, GyroErrorZ;
-float elapsedTime, currentTime, previousTime;
+float Time, currentTime, preTime;
 // Initialising all variables
 
 int c = 0;
@@ -36,9 +36,9 @@ void loop() {
   //We use the error values calculated by the eror function
 
   // === Read gyroscope data === //
-  previousTime = currentTime;        //taking time
+  preTime = currentTime;        //taking time
   currentTime = millis();            
-  elapsedTime = (currentTime - previousTime) / 1000; 
+  Time = (currentTime - preTime) / 1000; 
   Wire.beginTransmission(MPU);
   Wire.write(0x43); 
   Wire.endTransmission(false);
@@ -51,9 +51,9 @@ void loop() {
   GyroY = GyroY - GyroErrorY;
   GyroZ = GyroZ + GyroErrorZ; 
   // Currently the raw values are in degrees per seconds, deg/s, so we need to multiply by seconds (s) to get the angle in degrees
-  gyroAngleX = gyroAngleX + GyroX * elapsedTime; 
-  gyroAngleY = gyroAngleY + GyroY * elapsedTime;
-  yaw =  yaw + GyroZ * elapsedTime;
+  gyroAngleX = gyroAngleX + GyroX * Time; 
+  gyroAngleY = gyroAngleY + GyroY * Time;
+  yaw =  yaw + GyroZ * Time;
   roll = 0.96 * gyroAngleX + 0.04 * accAngleX;
   pitch = 0.96 * gyroAngleY + 0.04 * accAngleY;
   
