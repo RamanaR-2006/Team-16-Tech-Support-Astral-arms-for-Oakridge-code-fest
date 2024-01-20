@@ -6,6 +6,8 @@ import tkinter as tk
 from tkinter import scrolledtext
 # GUI
 
+import socket
+
 cred = credentials.Certificate("astralarms-a7a8f-firebase-adminsdk-sltkf-88a9f35d08.json")
 firebase_admin.initialize_app(cred)
 
