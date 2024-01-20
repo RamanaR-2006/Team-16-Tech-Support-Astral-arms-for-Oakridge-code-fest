@@ -33,7 +33,9 @@ while True:
     #using haar cascade to recognize the pic for testube. the 2nd num is scale factor, and the third is min neighnours
 
     for (x,y,w,h) in testubes:
-        frame = cv2.rectangle(frame,(x,y),(x+w,y+h),(255,0,0),2) 
+        if w > 30 and h > 30:
+            #make sure the picture is big enough
+            frame = cv2.rectangle(frame,(x,y),(x+w,y+h),(255,0,0),2) 
     #put rectangle around test-tube
     
     cv2.imshow('Webcam', frame)
