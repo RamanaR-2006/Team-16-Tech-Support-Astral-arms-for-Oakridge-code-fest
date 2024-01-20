@@ -10,20 +10,15 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 # Initialize Firebase Admin SDK with the service account key
 
-cred = credentials.Certificate("astralarms-a7a8f-firebase-adminsdk-sltkf-88a9f35d08.json")
-firebase_admin.initialize_app(cred)
+import tkinter as tk
+from tkinter import scrolledtext
+# GUI
 
-db = firestore.client()
-# Access9ollo9 Firestore
-
-ref = db.collection('Experiments')
-
-#collection stores information in a firestore database
 
 testube_cascade = cv2.CascadeClassifier("cascade.xml")
 #trained a haar cascade model for 26 minutes to detect test-tubesq
 
-cap = cv2.VideoCapture("Science Minute - Rainbow Test Tubes.mp4")
+cap = cv2.VideoCapture("sciencevid.mp4")
 #using .videocapture with index 1, index 1 referrences external camera. 0 will work on any laptop with inbuilt 
 #webcam
 
@@ -35,7 +30,7 @@ while True:
     #the image but gray
 
     testubes = testube_cascade.detectMultiScale(noColorImage,1.01,7)
-    #using haar cascade to recognize the pic for testube
+    #using haar cascade to recognize the pic for testube. the 2nd num is scale factor, and the third is min neighnours
 
     for (x,y,w,h) in testubes:
         frame = cv2.rectangle(frame,(x,y),(x+w,y+h),(255,0,0),2) 
