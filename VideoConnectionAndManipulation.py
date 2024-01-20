@@ -1,4 +1,5 @@
 import cv2
+
 #importing OpenCV(computer vision) library. This library will be crucial to anything related to camera and showing
 #the students the details of the experiment
 
@@ -13,16 +14,16 @@ cred = credentials.Certificate("astralarms-a7a8f-firebase-adminsdk-sltkf-88a9f35
 firebase_admin.initialize_app(cred)
 
 db = firestore.client()
-# Access Firestore
+# Access9ollo9 Firestore
 
-collection_ref = db.collection('Experiments')
-#db collection stores information in a firestore database
+ref = db.collection('Experiments')
 
+#collection stores information in a firestore database
 
 testube_cascade = cv2.CascadeClassifier("cascade.xml")
-#trained a haar cascade model for 26 minutes to detect test-tubes
+#trained a haar cascade model for 26 minutes to detect test-tubesq
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture("Science Minute - Rainbow Test Tubes.mp4")
 #using .videocapture with index 1, index 1 referrences external camera. 0 will work on any laptop with inbuilt 
 #webcam
 
