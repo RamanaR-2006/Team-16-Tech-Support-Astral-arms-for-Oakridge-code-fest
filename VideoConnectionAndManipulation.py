@@ -15,7 +15,7 @@ from tkinter import scrolledtext
 # GUI
 
 
-testube_cascade = cv2.CascadeClassifier("cascade.xml")
+testube_cascade = cv2.CascadeClassifier("cascade3.xml")
 #trained a haar cascade model for 26 minutes to detect test-tubesq
 
 cap = cv2.VideoCapture("sciencevid.mp4")
