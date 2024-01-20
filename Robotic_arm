@@ -1,1 +1,25 @@
-C++ file
+/*Test code 1
+*/
+
+#include <Wire.h>
+#include <Adafruit_PWMServoDriver.h>
+
+Adafruit_PWMServoDriver tech_support = Adafruit_PWMServoDriver();
+
+#define servoMIN 150
+#define servoMAX 650//650
+
+void setup() {
+  Serial.begin(9600);
+  tech_support.begin();
+  tech_support.setPWMFreq(60);
+}
+
+void loop() {
+    tech_support.setPWM(15,5, servoMIN);
+    tech_support.setPWM(1,5, servoMIN);
+    delay(300);
+    tech_support.setPWM(15, 30, servoMAX);
+    tech_support.setPWM(1, 30, servoMAX);
+    delay(300);
+}
