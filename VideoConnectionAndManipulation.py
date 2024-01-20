@@ -1,68 +1,49 @@
 import cv2
-
-#importing OpenCV(computer vision) library. This library will be crucial to anything related to camera and showing
-#the students the details of the experiment
-
 import numpy as np
-#numpy for arrays (for images technically)
-
-import firebase_admin
-from firebase_admin import credentials, firestore
-# Initialize Firebase Admin SDK with the service account key
-
-import tkinter as tk
-from tkinter import scrolledtext
-# GUI
-
 import socket
 import pickle
-import struct
-#uploading to web
+from flask import Flask, Response, render_template
+
+app = Flask(__name__)
 
 testube_cascade = cv2.CascadeClassifier("cascade4.xml")
-#trained a haar cascade model for 26 minutes to detect test-tubesq
+cap = cv2.VideoCapture(0)
 
-cap = cv2.VideoCapture("sciencevid.mp4")
-#using .videocapture with index 1, index 1 referrences external camera. 0 will work on any laptop with inbuilt 
-#webcam
+def generate_frames():
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+        else:
+            ret, buffer = cv2.imencode('.jpg',frame)
+            frame=buffer.tobytes()
+            #Convert the frame to grayscale for cascade detection
+            #noColorImage = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-s.setsockopt(socket.SOL_SOCKET,socket.SO_SNDBUF,1000000)
+            # Cascade detection for test tubes
+            #testubes = testube_cascade.detectMultiScale(noColorImage, 1.10, 3)
 
-server_ip = "127.0.0.1"
-server_port = 6666
+            # Draw rectangles around detected test tubes
+            #for (x, y, w, h) in testubes:
+                #frame = cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
 
-while True:
-    ret, frame = cap.read()
-    #command to capture each frame
+            
+            # Serialize the frame and yield it to the response
+            #frame = frame.tobytes()
+            yield (b'--frame\r\n'
+                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+        
+@app.route('/')
+def index():
+    return render_template('index.html')
 
-    noColorImage = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    #the image but gray
-
-    testubes = testube_cascade.detectMultiScale(noColorImage,1.10,3)
-    #using haar cascade to recognize the pic for testube. the 2nd num is scale factor, and the third is min neighnours
-
-    for (x,y,w,h) in testubes:
-        if w > 30 and h > 30:
-            #make sure the picture is big enough
-            frame = cv2.rectangle(frame,(x,y),(x+w,y+h),(255,0,0),2) 
-    #put rectangle around test-tube
-    
-    cv2.imshow('Webcam', frame)
-    #show frame
-
-    ret, buffer = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY),30])
-
-    x_as_bytes = pickle.dumps(buffer)
-
-    s.sendto((x_as_bytes),(server_ip,server_port))
-
-    if cv2.waitKey(25) == ord('q'):
-        break
-        #every 1 milisecond, cam records frame
-    #killswitch is q
+@app.route('/video')
+def video():
+    return Response(generate_frames(),mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
-cap.release()
-cv2.destroyAllWindows()
-#stop camera and code
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0', port=5000)
+
+
+

@@ -6,27 +6,63 @@ import cv2
 import numpy as np
 #numpy for arrays (for images technically)
 
+import firebase_admin
+from firebase_admin import credentials, firestore
+# Initialize Firebase Admin SDK with the service account key
+
+import tkinter as tk
+from tkinter import scrolledtext
+# GUI
+
 import socket
 import pickle
 import struct
 #uploading to web
 
+testube_cascade = cv2.CascadeClassifier("cascade4.xml")
+#trained a haar cascade model for 26 minutes to detect test-tubesq
+
+cap = cv2.VideoCapture("sciencevid.mp4")
+#using .videocapture with index 1, index 1 referrences external camera. 0 will work on any laptop with inbuilt 
+#webcam
+
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-ip = "127.0.0.1"
-port = 6666
-s.bind((ip, port))
+s.setsockopt(socket.SOL_SOCKET,socket.SO_SNDBUF,1000000)
+
+server_ip = "127.0.0.1"
+server_port = 6666
+
 while True:
-    x = s.recvfrom(1000000)
-    clientip = x[1][0]
+    ret, frame = cap.read()
+    #command to capture each frame
 
-    data = pickle.loads(data)
+    noColorImage = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    #the image but gray
 
-    frame = cv2.imdecode(data, cv2.IMREAD_COLOR)
+    testubes = testube_cascade.detectMultiScale(noColorImage,1.1,3)
+    #using haar cascade to recognize the pic for testube. the 2nd num is scale factor, and the third is min neighnours
 
-    cv2.imshow('Img Server', frame)
+    for (x,y,w,h) in testubes:
+        if w > 30 and h > 30:
+            #make sure the picture is big enough
+            frame = cv2.rectangle(frame,(x,y),(x+w,y+h),(255,0,0),2) 
+    #put rectangle around test-tube
+    
+    cv2.imshow('Webcam', frame)
+    #show frame
+
+    ret, buffer = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY),30])
+
+    x_as_bytes = pickle.dumps(buffer)
+
+    s.sendto((x_as_bytes),(server_ip,server_port))
 
     if cv2.waitKey(25) == ord('q'):
         break
         #every 1 milisecond, cam records frame
     #killswitch is q
+
+
+cap.release()
 cv2.destroyAllWindows()
+#stop camera and code
