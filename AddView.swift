@@ -9,9 +9,13 @@ import SwiftUI
 import Firebase
 import FirebaseStorage
 import FirebaseFirestore
+import UIKit
 
 
 struct AddView: View {
+    @State private var selectedImage: UIImage?
+    @State private var isImagePickerPresented = false
+    
     @State var expName: String = ""
     @State var expOrganisation: String = ""
     @State var expDuration: String = ""
@@ -21,7 +25,7 @@ struct AddView: View {
     var body: some View {
         ZStack{
             
-            Rectangle().frame(width:360,height:690).cornerRadius(40).foregroundColor(Navy).padding(50)
+            Rectangle().frame(width:390,height:710).cornerRadius(40).foregroundColor(Navy).padding(50)
             
             ScrollView{
                 
@@ -98,47 +102,69 @@ struct AddView: View {
                     .overlay(TextField("Precautions", text: $expPrecautions).padding(.leading, 30.0).font(Font.custom("Nexa-ExtraLight",size:20)).frame(width:300,height:80))
                     
                     Spacer()
-                    
+                
                 HStack{
                     Spacer()
                     Rectangle().frame(width:150,height:50).cornerRadius(40).foregroundColor(.blue).overlay(
-                        Button(action: {}, label: {
+                        Button(action: {
+                            self.isImagePickerPresented = true
+                        }, label: {
                             Text("Add Image").foregroundColor(.white).font(Font.custom("Nexa-Heavy",size:20))
                         }))
                     
                     Spacer()
                     
-                    Rectangle().frame(width:170,height:50).cornerRadius(40).foregroundColor(LightBlue).overlay(
+                    Rectangle().frame(width:120,height:50).cornerRadius(40).foregroundColor(LightBlue).overlay(
                         Button(action: {
                             addNewExperiment()
                         }, label: {
-                            Text("Add Experiment").foregroundColor(.white).font(Font.custom("Nexa-Heavy",size:20))
+                            Text("Add Exp").foregroundColor(.white).font(Font.custom("Nexa-Heavy",size:20))
                         }))
                     Spacer()
-                }
+                    if selectedImage != nil {
+                        Image(uiImage: selectedImage!)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width:80,height: 80)
+                    }
+                    
                     Spacer()
                     
-            }.frame(width:360,height:690)
+                }
+                
+                    Spacer()
+                    
+            }.frame(width:360,height:710).sheet(isPresented: $isImagePickerPresented) {
+                ImagePicker(selectedImage: $selectedImage, sourceType: .photoLibrary)
+            }
+            
+            
             
         }
     }
     private func addNewExperiment() {
         // Upload the image first
-        //uploadImage(selectedImage) { imageUrl in
+        uploadImage(selectedImage) { imageUrl in
+            
+            guard !imageUrl.isEmpty else {
+                        print("Failed to upload image or get its URL")
+                        return
+                    }
+            
             // Construct the product data
-            let productData: [String: Any] = [
+            let experimentData: [String: Any] = [
                 "expName": self.expName,
                 "expOrganisation": self.expOrganisation,
                 "expDuration": self.expDuration,
                 "expMaterials": self.expMaterials,
                 "expProcedure": self.expProcedure,
                 "expPrecautions": self.expPrecautions,
-                //"productURL": imageUrl,
+                "productURL": imageUrl
             ]
-
+            
             // Upload product data to Firestore
             let db = Firestore.firestore()
-            db.collection("Experiments").addDocument(data: productData) { error in
+            db.collection("Experiments").addDocument(data: experimentData) { error in
                 if let error = error {
                     print("Error adding document: \(error)")
                 } else {
@@ -146,9 +172,43 @@ struct AddView: View {
                 }
             }
         }
+        }
+    
+    private func uploadImage(_ image: UIImage?, completion: @escaping (String) -> Void) {
+        guard let imageData = image?.jpegData(compressionQuality: 0.4) else {
+            completion("")
+            return
+        }
+
+        let storageRef = Storage.storage().reference()
+        let imageRef = storageRef.child("images/\(UUID().uuidString).jpg")
+
+        imageRef.putData(imageData, metadata: nil) { metadata, error in
+            if let error = error {
+                print("Error uploading image: \(error)")
+                completion("")
+                return
+            }
+
+            imageRef.downloadURL { url, error in
+                if let error = error {
+                    print("Error getting download URL: \(error)")
+                    completion("")
+                    return
+                }
+
+                if let imageUrl = url?.absoluteString {
+                    completion(imageUrl)
+                } else {
+                    completion("")
+                }
+            }
+        }
+    }
+
     
     private func resetForm() {
-        //self.selectedImage = nil
+        self.selectedImage = nil
         self.expName = ""
         self.expOrganisation = ""
         self.expDuration = ""
@@ -157,6 +217,41 @@ struct AddView: View {
         self.expPrecautions = ""
     }
     }
+
+struct ImagePicker: UIViewControllerRepresentable {
+    @Binding var selectedImage: UIImage?
+    @Environment(\.presentationMode) var presentationMode
+    var sourceType: UIImagePickerController.SourceType
+
+    func makeUIViewController(context: Context) -> UIImagePickerController {
+        let picker = UIImagePickerController()
+        picker.sourceType = sourceType
+        picker.delegate = context.coordinator
+        return picker
+    }
+
+    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+
+    class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+        let parent: ImagePicker
+
+        init(_ parent: ImagePicker) {
+            self.parent = parent
+        }
+
+        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+            if let image = info[.originalImage] as? UIImage {
+                parent.selectedImage = image
+            }
+
+            parent.presentationMode.wrappedValue.dismiss()
+        }
+    }
+}
 
 
 #Preview {
