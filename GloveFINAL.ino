@@ -63,27 +63,28 @@ void loop() {
   // Serial.print(pitch);
   // Serial.print("/");
   // Serial.println(yaw);
-
+  
+//towards left
   if (yaw > 26){
     Serial.print("L");
     delay(30);
   }
-
+// towards left
   if (yaw < -28){
     Serial.print("R");
     delay(30);
   }
-
+// to the back
   if (pitch > 30){
     Serial.print("B");
     delay(30);
   }
-
+// to the front
   if (pitch < -48){
     Serial.print("F");
     delay(30);
   }
-
+//otherwise, it is stationary
 }
 void calculate_IMU_error() {
   // We can call this funtion in the setup section to calculate the accelerometer and gyro data error. From here we will get the error values used in the above equations printed on the Serial Monitor.
