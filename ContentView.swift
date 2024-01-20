@@ -13,6 +13,7 @@ public let LightBlue = Color(red: 26/255, green: 226/255, blue: 233/255)
 public let Pluie = Color(red: 100/255, green: 119/255, blue: 108/255)
 
 struct ContentView: View {
+    @StateObject var viewModel = ExperimentViewModel()
     var body: some View {
         TabView{
             
@@ -20,7 +21,7 @@ struct ContentView: View {
                 Label("Add Experiment", systemImage: "plus")
             }
             
-            PrepareView().tabItem {
+            PrepareView(viewModel: viewModel).tabItem {
                 Label("Prepare Experiment", systemImage: "pencil.and.list.clipboard")
                 
             }
@@ -34,8 +35,8 @@ struct ContentView: View {
         }
     }
 }
+
+
     
-    #Preview {
-        ContentView()
-    }
+
 

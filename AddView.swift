@@ -146,11 +146,6 @@ struct AddView: View {
         // Upload the image first
         uploadImage(selectedImage) { imageUrl in
             
-            guard !imageUrl.isEmpty else {
-                        print("Failed to upload image or get its URL")
-                        return
-                    }
-            
             // Construct the product data
             let experimentData: [String: Any] = [
                 "expName": self.expName,
@@ -159,7 +154,7 @@ struct AddView: View {
                 "expMaterials": self.expMaterials,
                 "expProcedure": self.expProcedure,
                 "expPrecautions": self.expPrecautions,
-                "productURL": imageUrl
+                "expURL": imageUrl
             ]
             
             // Upload product data to Firestore
