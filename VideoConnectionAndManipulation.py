@@ -2,27 +2,25 @@ import cv2
 #importing OpenCV(computer vision) library. This library will be crucial to anything related to camera and showing
 #the students the details of the experiment
 
-import pyrebase
-#firebase is googles cloud databse. i downloaded the Pyrebase4 library on powershell and am gonna use it to
-#recognize the instructions stored in the database
+import numpy as np
+#numpy for arrays (for images technically)
 
-config = {
-    "apiKey": "AIzaSyAKVwyBbEW538zXDW3jBAaRBepXh7lL3ms",
-    "authDomain": "astralarms-a7a8f.firebaseapp.com",
-    "projectId": "astralarms-a7a8f",
-    "databaseURL": "https://astralarms-a7a8f-default-rtdb.asia-southeast1.firebasedatabase.app/",
-    "storageBucket": "astralarms-a7a8f.appspot.com",
-    "messagingSenderId": "861360827673",
-    "appId": "1:861360827673:web:e25d5e4d2dd9ab2ce86988",
-    "measurementId": "G-3Z6E7V8WVX"
-}
-#information about the astral arms firebase is now stored in the variable config
+import firebase_admin
+from firebase_admin import credentials, firestore
+# Initialize Firebase Admin SDK with the service account key
 
-firebase = pyrebase.initialize_app(config)
-#initialize firebase for the library
+cred = credentials.Certificate("astralarms-a7a8f-firebase-adminsdk-sltkf-88a9f35d08.json")
+firebase_admin.initialize_app(cred)
 
-database = firebase.database()
-#initialize the realtime database that stores information about the experiments
+db = firestore.client()
+# Access Firestore
+
+collection_ref = db.collection('Experiments')
+#db collection stores information in a firestore database
+
+
+testube_cascade = cv2.CascadeClassifier("cascade.xml")
+#trained a haar cascade model for 26 minutes to detect test-tubes
 
 cap = cv2.VideoCapture(0)
 #using .videocapture with index 1, index 1 referrences external camera. 0 will work on any laptop with inbuilt 
@@ -31,11 +29,23 @@ cap = cv2.VideoCapture(0)
 while True:
     ret, frame = cap.read()
     #command to capture each frame
+
+    noColorImage = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    #the image but gray
+
+    testubes = testube_cascade.detectMultiScale(noColorImage,1.01,7)
+    #using haar cascade to recognize the pic for testube
+
+    for (x,y,w,h) in testubes:
+        frame = cv2.rectangle(frame,(x,y),(x+w,y+h),(255,0,0),2) 
+    #put rectangle around test-tube
     
     cv2.imshow('Webcam', frame)
     #show frame
 
-    if cv2.waitKey(1) == ord('q'):
+
+
+    if cv2.waitKey(25) == ord('q'):
         break
         #every 1 milisecond, cam records frame
     #killswitch is q
