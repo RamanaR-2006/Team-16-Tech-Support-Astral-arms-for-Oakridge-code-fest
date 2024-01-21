@@ -1,0 +1,61 @@
+#include <Servo.h>
+#include <Wire.h>
+ 
+#include <Adafruit_PWMServoDriver.h>
+Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
+int pos0 = 102;
+int pos180 = 512;
+int down=0;
+int down2=0;
+int down3=0;
+int down4=0;
+void setServo(int servo, int angle) {
+  int duty;
+  duty = map(angle, 0, 180, pos0, pos180);
+  pwm.setPWM(servo, 0, duty);
+  delay(300);
+}
+void setup() 
+{
+  delay(5000);                            // <-- So I have time to get controller to starting position
+  
+  pwm.begin();
+  pwm.setPWMFreq(50);            
+  pinMode(13,INPUT_PULLUP);
+  Serial.begin(9600);
+  setServo(1, 0);
+   setServo(1, 90);
+   setServo(1, 45);
+}
+
+
+
+void loop() 
+{
+  // put your main code here, to run repeatedly:
+  if(Serial.available())
+  {
+    char val = Serial.read();
+    Serial.println(val);
+    if(val == 'R'&&down<=90)
+    {
+      down=down+5;
+      setServo(1, down);
+    }
+    if(val == 'L')
+    {
+      down2=down2+5;
+      setServo(1, down2);
+    }
+    if(val == 'F')
+    {
+      down3=down3+5;
+      setServo(2, down3);
+    }
+   if(val == 'D')
+    {
+      down4=down4+5;
+      setServo(4, down4);
+    }
+  }
+}
