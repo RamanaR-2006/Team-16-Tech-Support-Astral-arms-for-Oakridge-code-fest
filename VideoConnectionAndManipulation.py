@@ -17,19 +17,7 @@ def generate_frames():
         else:
             ret, buffer = cv2.imencode('.jpg',frame)
             frame=buffer.tobytes()
-            #Convert the frame to grayscale for cascade detection
-            #noColorImage = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-            # Cascade detection for test tubes
-            #testubes = testube_cascade.detectMultiScale(noColorImage, 1.10, 3)
-
-            # Draw rectangles around detected test tubes
-            #for (x, y, w, h) in testubes:
-                #frame = cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
-
-            
-            # Serialize the frame and yield it to the response
-            #frame = frame.tobytes()
             yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
         
